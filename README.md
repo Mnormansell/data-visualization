@@ -4,3 +4,8 @@
 * C3 is used to add graphical summaries that capture topic quantities that the circular layout cannot.
 
 ## Example
+![](https://github.com/Mnormansell/data-visualization/blob/master/readme_files/example.gif)
+
+## Breakdown
+A pdf breakdown of the visualization
+![](https://github.com/Mnormansell/data-visualization/blob/master/readme_files/picofpdf.png)
