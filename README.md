@@ -8,4 +8,4 @@
 
 ## Breakdown
 A pdf breakdown of the visualization
-![](https://github.com/Mnormansell/data-visualization/blob/master/readme_files/picofpdf.png)
+![](https://github.com/Mnormansell/data-visualization/blob/master/readme_files/picofpdft.PNG)
