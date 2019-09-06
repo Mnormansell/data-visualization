@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<link rel="shortcut icon" href="#">
+<link href="https://fonts.googleapis.com/css?family=Spectral" rel="stylesheet">
+  </head>
+  <body onload="getData()">
+
+
+
+    <meta charset="utf-8">
+    <!-- Dependencies -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <!-- Range slider code -->
+    <script src="https://cdn.rawgit.com/RasmusFonseca/d3RangeSlider/master/d3RangeSlider.js"></script>
+
+    <!-- Range slider style -->
+    <link href="https://cdn.rawgit.com/RasmusFonseca/d3RangeSlider/master/d3RangeSlider.css" rel="stylesheet">
+    
+      <!-- Load c3.css -->
+    <link href="c3-0.7.0/c3.css" rel="stylesheet">
+    <script src="c3-0.7.0/c3.min.js"></script>
+    <style>
+        .topic-text {
+            font-size: 40px;
+            font-family: 'Spectral', serif;
+        }
+        .title {
+            text-align: center; /*align our text in center*/
+            fill: teal; /*set color to teal*/
+            font-family: Tahoma; /*change font family*/
+            font-size: 66px; /*set font size to 66 pixels*/
+        }
+        .tooltip {
+             background: #eee;
+             box-shadow: 0 0 5px #999999;
+             color: #333;
+             font-size: 15px;
+             left: 130px;
+             padding: 10px;
+             position: absolute;
+             text-align: center;
+             top: 95px;
+             max-width: 300px;
+             z-index: 10;
+         }
+        .interactive-circl  e {
+            stroke: #000;
+            stroke-opacity: 0.5;
+            stroke-width: 1.25px;
+        }
+        .handle {
+            fill: #fff;
+            stroke: #000;
+            stroke-opacity: 0.5;
+            stroke-width: 1.25px;
+        }
+        .tooltip-slider {
+             background: #eee;
+             box-shadow: 0 0 5px #999999;
+             color: teal;
+             font-size: 25px;
+             left: 1425px;
+             padding: 10px;
+             position: absolute;
+             text-align: left;
+             top: 170px;
+             min-width: 200px;
+             min-height: 125px;
+             max-height: 125px;
+             z-index: 10;
+         }
+        .track,
+        .track-inset,
+        .track-overlay {
+          stroke-linecap: round;
+        }
+
+        .track {
+          stroke: #000;
+          stroke-opacity: 0.3;
+          stroke-width: 10px;
+        }
+
+        .track-inset {
+          stroke: #dcdcdc;
+          stroke-width: 8px;
+        }
+
+        .track-overlay {
+          pointer-events: stroke;
+          stroke-width: 50px;
+          stroke: transparent;
+          cursor: crosshair;
+        }
+        .play-button {
+          position: absolute;
+          background: #f08080;
+          top: 405px;
+          padding-right: 26px;
+          border-radius: 3px;
+          border: none;
+          color: white;
+          margin: 0;
+          padding: 0 12px;
+          cursor: pointer;
+          height: 30px;
+        }
+        
+
+        .play-button:hover {
+          box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 3px 10px 0 rgba(0,0,0,0.19);
+        }
+    
+        .btn-group {
+            position: absolute;
+            top: 180px;
+            left: 350px;
+        }
+        .btn-group button {
+          background-color: #e7e7e7; /* Green background */
+          
+          color: black; /* White text */
+          padding: 10px 24px; /* Some padding */
+          cursor: pointer; /* Pointer/hand icon */
+          float: left; /* Float the buttons side by side */
+          font-size: 20px;
+          height:50px;
+          width:150px
+          font-family: 'Spectral', serif;
+        }
+
+        .btn-group button:not(:last-child) {
+          border-right: none; /* Prevent double borders */
+        }
+
+        /* Clear floats (clearfix hack) */
+        .btn-group:after {
+          content: "";
+          clear: both;
+          display: table;
+        }
+        .all-button {
+          position: absolute;
+          top: 180px;
+          left: 180px;
+          background-color: rgb(0, 128, 128); /* Green */
+          box-shadow: 0px 1px;
+          color: black;
+          display: inline-block;
+          font-size: 20px;
+          cursor: pointer;
+          height:50px;
+          width:150px;
+          font-family: 'Spectral', serif;
+        }
+        
+        .apply-filter {
+          position: absolute;
+          top: 190px;
+          left: 1280px;
+          background-color: #e7e7e7; /* Green */
+          border-radius:5px;
+	      border:1px solid #566963;
+          box-shadow: 1px 1px;
+          color: black;
+          display: inline-block;
+          font-size: 20px;
+          cursor: pointer;
+          height:100px;
+          width:100px;
+          font-family: 'Spectral', serif;
+        }
+        
+        .apply-filter:hover{
+            background-color:lightslategray;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 3px 10px 0 rgba(0,0,0,0.19);
+        }
+        
+        .day-button:hover,.all-button:hover {
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 3px 10px 0 rgba(0,0,0,0.19);
+        }   
+        .containerTest {
+            top: 240px;
+            left: 170px;
+            width: 1063px;
+        }
+        #slider-container {
+            position: relative;
+            top: 240px;
+            height:30px;
+            background-color: #eeeef5;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            align-items: center;
+            align-content: flex-start;
+        }
+    </style>    
+      
+    <div class="tooltip" style="position: absolute; z-index: 100; visibility: visible; background: white none repeat scroll 0% 0%; border: 2px solid; border-radius: 5px; padding: 5px; opacity: 0;"></div>
+    
+    <div id="slider-container" class="containerTest"></div>
+    
+    
+    <svg id="background" width="2500" height="1500" color="#777777">
+    <rect x="170" y="248" width="265.75" height="10" opacity=".5" fill="#003366"></rect>
+    <rect x="967.4" y="248" width="265.75" height="10" opacity=".5" fill="#003366"></rect>
+    <rect x="435.8" y="248" width="531.5" height="10" opacity=".5" fill="#FDB813"></rect>
+        
+    <line x1="170.0" x2="170.0" y1="248" y2="268" style="stroke:black;stroke-width:2" ></line>
+    <line x1="214.3" x2="214.3" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="258.6" x2="258.6" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="302.9" x2="302.9" y1="248" y2="263" style="stroke:black;stroke-width:2" ></line>
+    <line x1="347.2" x2="347.2" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="391.5" x2="391.5" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="435.8" x2="435.8" y1="248" y2="268" style="stroke:black;stroke-width:2" ></line>
+    <line x1="480.1" x2="480.1" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="524.4" x2="524.4" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="568.7" x2="568.7" y1="248" y2="263" style="stroke:black;stroke-width:2" ></line>
+    <line x1="613.0" x2="613.0" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="657.3" x2="657.3" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="701.5" x2="701.6" y1="248" y2="268" style="stroke:black;stroke-width:2" ></line>
+    <line x1="745.9" x2="745.9" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="790.2" x2="790.2" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="834.5" x2="834.5" y1="248" y2="263" style="stroke:black;stroke-width:2" ></line>
+    <line x1="878.8" x2="878.8" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="923.1" x2="923.1" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="967.4" x2="967.4" y1="248" y2="268" style="stroke:black;stroke-width:2" ></line>
+    <line x1="1011.7" x2="1011.7" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="1056.0" x2="1056.0" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="1100.3" x2="1100.3" y1="248" y2="263" style="stroke:black;stroke-width:2" ></line>
+    <line x1="1144.6" x2="1144.6" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="1188.9" x2="1188.9" y1="248" y2="260" style="stroke:black;stroke-width:2" ></line>
+    <line x1="1233" x2="1233" y1="248" y2="268" style="stroke:black;stroke-width:2" ></line>
+        
+    <text text-anchor="middle" x="701.5" y="280" font-family="Spectral, serif">Noon</text> 
+    <text text-anchor="middle" x="1233" y="280" font-family="Spectral, serif">Midnight</text> 
+    <text text-anchor="middle" x="170" y="280" font-family="Spectral, serif">Midnight</text> 
+    <text text-anchor="middle" x="435.8" y="280" font-family="Spectral, serif">6:00 AM</text> 
+    <text text-anchor="middle" x="967.4" y="280" font-family="Spectral, serif">6:00 PM</text> 
+        
+    <line x1="850" x2="850" y1="320" y2="335" style="stroke:black;stroke-width:2" ></line>
+    <text text-anchor="middle" x="850" y="350" font-family="Spectral, serif">Jun 15, 2015</text>
+        
+    <line x1="1043" x2="1043" y1="320" y2="335" style="stroke:black;stroke-width:2" ></line>
+    <text text-anchor="middle" x="1043" y="350" font-family="Spectral, serif">Jan 1, 2016</text>
+        
+    <line x1="1271" x2="1271" y1="320" y2="335" style="stroke:black;stroke-width:2" ></line>
+    <text text-anchor="middle" x="1271" y="350" font-family="Spectral, serif">Jan 1, 2017</text>
+        
+    <line x1="1416" x2="1416" y1="320" y2="335" style="stroke:black;stroke-width:2" ></line>
+    <text text-anchor="middle" x="1416" y="350" font-family="Spectral, serif">Jan 1, 2018</text>
+        
+    <line x1="1614" x2="1614" y1="320" y2="335" style="stroke:black;stroke-width:2" ></line>
+    <text text-anchor="end" x="1624" y="350" font-family="Spectral, serif">Jan 1, 2019</text>
+        
+    <line x1="1685" x2="1685" y1="320" y2="335" style="stroke:black;stroke-width:2" ></line>
+    <text text-anchor="middle" x="1685" y="350" font-family="Spectral, serif">Apr 20, 2019</text>
+        
+        
+    </svg>
+    <button id="playbutton" class="play-button" style="left: 1260px" onclick="doStuffs()">Play</button>
+    <button id="stepforward" class="play-button" style="left: 1320px"onclick="step()">Step Forward</button>
+    <button id="stepbackward" class="play-button" style="left: 1135px" onclick="stepBack()">Step Backward</button>
+    <button id="allbutton" class="all-button" onclick="changeAll(event)">All</button>
+    <button id="applyfilter" class="apply-filter" onclick="applyFilter()">Apply Filter</button>
+    <div class="btn-group">
+        <button id="daybutton" class="day-button" onclick="changeColor(event)">Monday</button>
+        <button id="daybutton" class="day-button" onclick="changeColor(event)">Tuesday</button>
+        <button id="daybutton" class="day-button" onclick="changeColor(event)">Wednesday</button>
+        <button id="daybutton" class="day-button" onclick="changeColor(event)">Thursday</button>
+        <button id="daybutton" class="day-button" onclick="changeColor(event)">Friday</button>
+        <button id="daybutton" class="day-button" onclick="changeColor(event)">Saturday</button>
+        <button id="daybutton" class="day-button" onclick="changeColor(event)">Sunday</button>
+    </div>
+
+    <div id="overallChart" class="chartz"></div>
+    <div id="flex" class="container"> 
+        <div id="topicChart" class="chartz"></div>
+        <div id="attackChart" class="chartz"></div>
+        <div id="newsChart" class="chartz"></div>
+        <div id="placesChart" class="chartz"></div>
+        <div id="oppChart" class="chartz"></div>
+        <div id="suppChart" class="chartz"></div>
+    </div>
+    
+    <script type="text/javascript">
+        /* variables, javascript and D3 functions go here */
+        var allTweets;
+        var textData;
+        // Dictionary for slider -> changes
+        var offsetTable;
+        var hasTopic;
+        var topicss = ["Military","Gun","Crime","Border","Wall","Immigration","Economy","Jobs","Trade","Court","America","ISIS","Collusion","Mueller","Witch","FBI","Fake","CNN","NBC","CBS","FOX","PRESS","Israel","Washington","Europe","Russia","Puerto","China","California","Virginia","Hillary","Obama","Bernie","Pelosi","Schumer","Biden","DNC","Dem","Repub","Mitch","Paul","Hannity","Donald","Trump","Pence"]
+        var currentOffsetX = {};
+        var currentOffsetY = {};
+        var currentID = {};
+        var sliderStart = 850;
+        var sliderEnd = 1685;
+        var sliderVal = 800;
+        var actualVal = Math.floor((sliderVal-sliderStart)*binWidth);
+        var binWidth = 18;
+        var playing = false;
+        var originx = 1250;
+        var originy = 970;
+        var filter_slider = createD3RangeSlider(0, 24, "#slider-container");
+        
+        var counts2d = {};
+        var ids2d = {};
+        var offset2d = {};
+        var ids = [];
+        var oC;
+        var tC;
+        var aC;
+        var nC;
+        var pC;
+        var opC;
+        var sC;
+            
+        function getData() {
+            d3.csv("data/data.csv", function(d) {
+                allTweets = d;
+                // Initialize dictionary
+            });
+            d3.csv("data/topics_text.csv", function(d) {
+                textData = d;
+                drawText(d.length);
+            });
+            d3.csv("data/offset_values.csv", function(d) {
+                offsetTable = d;
+            });
+            d3.csv("data/has_topic.csv", function(d) {
+               hasTopic = d; 
+            });
+            d3.csv("data/topic_amalgamation.csv", function(d) {
+               counts2d = d; 
+            }); 
+            d3.csv("data/id_amalgamation.csv", function(d) {
+               ids2d = d; 
+            });
+            d3.csv("data/offset_table.csv", function(d) {
+               offset2d = d; 
+            });
+            topicss.forEach(function(d) {
+               currentOffsetX[d] = 0; 
+                currentOffsetY[d] = 0; 
+                currentID[d] = -1;
+            });
+            d3.select("#background").append("text")
+            .attr("text-anchor", 'center')
+            .attr("x", 825)
+            .attr("y", 100)
+            .attr("class", "title")
+            .text("The Topic Mobility of Trumps Tweets");
+            actualVal = Math.floor((sliderVal-sliderStart)*binWidth);
+            createSlider();
+            filter_slider.range(0,24);
+            
+        }
+          
+        function createCharts() {
+            let o = ["Overall"]
+            let t = ["Topics"]
+            let a = ["Attacks"]
+            let n = ["News"]
+            let p = ["Places"]
+            let op = ["Opponents"]
+            let s = ["Supporters"]
+            
+            let index = 0;
+            topicss.forEach(function(d) {
+                o.push(counts2d[0][d]);
+                if (index < 12) t.push(counts2d[0][d]);
+                else if (index < 17) a.push(counts2d[0][d]);
+                else if (index < 22) n.push(counts2d[0][d]);
+                else if (index < 30) p.push(counts2d[0][d]);
+                else if (index < 38) op.push(counts2d[0][d]);
+                else s.push(counts2d[0][d]);
+                index++;
+            })
+            oC = c3.generate({
+                bindto: '#overallChart',
+                data: {
+                  columns: [o],
+                  type: 'bar'
+                },
+                axis:{
+                  x:{
+                    type: 'category',
+                    categories: topicss
+                  }
+                },
+                colors: {
+                    Overall: '#b7b4aa'
+                }
+            });
+            tC = c3.generate({
+                bindto: '#topicChart',
+                size: {
+                    height: 240,
+                    width: 440
+                },
+                data: {
+                  columns: [t],
+                  type: 'bar',
+                    colors: {
+                        Topics: '#b7b4aa'
+                    },
+                    order: 'desc'
+                },
+                axis:{
+                  x:{
+                    type: 'category',
+                    categories: topicss.slice(0,12)
+                  }
+                }
+            });
+            aC = c3.generate({
+                bindto: '#attackChart',
+                size: {
+                    height: 240,
+                    width: 440
+                },
+                data: {
+                  columns: [a],
+                  type: 'bar',
+                    colors: {
+                        Attacks: '#d6a10e'
+                    },
+                    order: 'desc'
+                },
+                axis:{
+                  x:{
+                    type: 'category',
+                    categories: topicss.slice(12,17)
+                  }
+                }
+            });
+            nC = c3.generate({
+                bindto: '#newsChart',
+                size: {
+                    height: 240,
+                    width: 440
+                },
+                data: {
+                  columns: [n],
+                  type: 'bar',
+                    colors: {
+                        News: '#15c40f'
+                    },
+                    order: 'desc'
+                },
+                axis:{
+                  x:{
+                    type: 'category',
+                    categories: topicss.slice(17, 22)
+                  }
+                }
+            });
+            pC = c3.generate({
+                bindto: '#placesChart',
+                size: {
+                    height: 240,
+                    width: 440
+                },
+                data: {
+                  columns: [p],
+                  type: 'bar',
+                    colors: {
+                        Places: '#0fc493'
+                    },
+                    order: 'desc'
+                },
+                axis:{
+                  x:{
+                    type: 'category',
+                    categories: topicss.slice(22,30)
+                  }
+                }
+            });
+            opC = c3.generate({
+                bindto: '#oppChart',
+                size: {
+                    height: 240,
+                    width: 440
+                },
+                data: {
+                  columns: [op],
+                  type: 'bar',
+                    colors: {
+                        Opponents: '#0b47c6'
+                    },
+                    order: 'desc'
+                },
+                axis:{
+                  x:{
+                    type: 'category',
+                    categories: topicss.slice(30,38)
+                  }
+                }
+            });
+            sC = c3.generate({
+                bindto: '#suppChart',
+                size: {
+                    height: 240,
+                    width: 440
+                },
+                data: {
+                  columns: [s],
+                  type: 'bar',
+                    colors: {
+                        Supporters: '#ed0219'
+                    },
+                    order: 'desc'
+                },
+                axis:{
+                  x:{
+                    type: 'category',
+                    categories: topicss.slice(38,45)
+                  }
+                }
+            });   
+        }
+        
+            
+        function drawText(size) {    
+            var img = d3.select("#background");
+            for (var i = 0; i < size; i++) {
+                const text = img.append("text")
+                .attr("class", "topic-text")
+                .attr("x", textData[i].x)
+                .attr("y", textData[i].y)
+                .attr("fill", textData[i].fill)
+                .attr("stroke", "black")
+                .attr("id", textData[i].id)
+                .text(textData[i].text)
+                .on("mouseover", highlight)
+                .on("mouseout", unhighlight)
+                .on("mousemove", mousemove);       
+            }
+        }
+
+        // tooltip
+        const tooltip = d3.select("body")
+                        .append("div")
+                        .attr("class", "tooltip")
+                        .style("position", "absolute")
+                        .style("z-index", "100")
+                        .style("visibility", "visible")
+                        .style("background", "white")
+                        .style("border", "solid")
+                        .style("border-width", "2px")
+                        .style("border-radius", "5px")
+                        .style("padding", "5px")
+                        .style("opacity", 0);
+        
+        function highlight(d,i) {
+            tooltip.style("opacity", 1);
+            d3.selectAll(".topic-text").style("opacity", .05);
+            d3.select(this)
+            .style("opacity", 1)
+            .style("stroke-width", 3);
+        }
+        
+        function unhighlight(d,i) {
+            tooltip.style("opacity", 0);
+            d3.selectAll(".topic-text")
+            .style("stroke-width", 1.25)
+            .style("opacity", 1);
+        }
+        
+        var mousemove = function(d) {
+            let id = Number(d3.select(this).attr("id"))
+            
+            if (id == -1) {
+                tooltip.html("<font size='4'><b>No Previous Tweet</b></font>")
+                .style("left", (d3.mouse(this)[0]+20) + "px")
+                .style("top", (d3.mouse(this)[1]) + "px");
+            } else {
+                const tweet = allTweets[id];
+                let topic = d3.select(this).text();
+                tooltip.html(
+                    "<font size='4'><b>Topic</b>: " + topic + "</font>"
+                    + "<br/>"
+                    + "<font size='4'><b>Date</b>: </font> " + tweet.nice_date
+                    + "<br/>"
+                    + "<font size='4'><b>Text</b>:</font> " + tweet.text
+                )
+                .style("left", (d3.mouse(this)[0]+20) + "px")
+                .style("top", (d3.mouse(this)[1]) + "px");
+            }
+
+        }
+        
+        const tooltipSlider = d3.select("body")
+            .append("div")
+            .attr("class", "tooltip-slider")
+            .style("position", "absolute")
+            .style("z-index", "100")
+            .style("visibility", "visible")
+            .style("background", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px")
+            .style("opacity", 1);
+        
+        function createSlider() {
+            d3.select("#background").append("line")
+            .attr("x1", sliderStart)
+            .attr("x2", sliderEnd)
+            .attr("y1", 315)
+            .attr("y2", 315)
+            .attr("class", "track")
+            .attr("desc", "slider-base")
+          
+            d3.select("#background").append("line")
+            .attr("x1", sliderStart)
+            .attr("x2", sliderEnd)
+            .attr("y1", 315)
+            .attr("y2", 315)
+            .attr("class", "track-inset")
+            .attr("desc", "slider-inset")
+            .on("click", function(d) {
+                var sliderVal = Number(d3.event.x);
+                d3.select("#slider-handle").attr("cx", d3.event.x);
+                actualVal = Math.floor((sliderVal-sliderStart)*binWidth);
+                
+                let subject = Math.max(Number(ids[Math.round(actualVal)]),0);
+                tooltipSlider.html(               
+                "<font size='4'><b>Date</b>: " + allTweets[subject].nice_date + "</font>"
+                    + "<br/>"
+                    + "<font size='4'><b>Day</b>: " + allTweets[subject].day + "</font>"
+                    + "<br/>"
+                    + "<font size='4'><b>Text</b>: " + allTweets[subject].text + "</font>"                
+                );
+                updateText(actualVal);
+            })
+            .on("mouseover", function(d) {
+                d3.select(this).style("cursor", "crosshair")})
+            .on("mouseout", function(d) {
+                d3.select(this).style("cursor", "default"); 
+            });
+            
+            d3.select("#background").append("circle")
+            .attr("cx", sliderStart)
+            .attr("cy", 315)
+            .attr("r", 10)
+            .attr("class", "handle")
+            .attr("id", "slider-handle")
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended))
+            .on("mouseover", function(d) {
+                d3.select(this).style("cursor", "pointer")})
+            .on("mouseout", function(d) {
+                d3.select(this).style("cursor", "default"); 
+            });
+            
+        }
+                
+        function dragstarted(d) {
+          d3.select(this).raise().classed("active", true);
+        }
+
+        function dragged(d) {
+            if (d3.select(this).attr("cx") >= sliderStart && d3.select(this).attr("cx") <= sliderEnd) {
+                
+                d3.select(this).attr("cx", d3.event.x);
+                
+                sliderVal = Number(d3.select(this).attr("cx"));
+                actualVal = Math.floor((sliderVal-sliderStart)*binWidth);
+                
+                let subject = Math.max(Number(ids[Math.round(actualVal)]), 0);
+                tooltipSlider.html(
+                "<font size='4'><b>Date</b>: " + allTweets[subject].nice_date + "</font>"
+                    + "<br/>"
+                    + "<font size='4'><b>Day</b>: " + allTweets[subject].day + "</font>"
+                    + "<br/>"
+                    + "<font size='4'><b>Text</b>: " + allTweets[subject].text + "</font>"
+                );
+
+                updateText(actualVal);
+            } else {
+                if (d3.select(this).attr("cx") >= sliderEnd) {
+                    d3.select(this).attr("cx", sliderEnd); 
+                    sliderVal = sliderEnd;
+                    actualVal = Math.floor((sliderVal-sliderStart)*binWidth);
+                }
+                else if(d3.select(this).attr("cx") <= sliderStart) {
+                    d3.select(this).attr("cx", sliderStart);
+                    sliderVal = sliderStart;
+                    actualVal = Math.floor((sliderVal-sliderStart)*binWidth);
+                }
+            }
+            
+
+        }
+
+        function dragended(d) {
+          d3.select(this).classed("active", false);
+            if (d3.select(this).attr("cx") >= sliderEnd) {
+                d3.select(this).attr("cx", sliderEnd); 
+                sliderVal = sliderEnd;
+                actualVal = Math.floor((sliderVal-sliderStart)*binWidth);
+            }
+            else if(d3.select(this).attr("cx") <= sliderStart) {
+                d3.select(this).attr("cx", sliderStart);
+                sliderVal = sliderStart;
+                actualVal = Math.floor((sliderVal-sliderStart)*binWidth);
+            }
+    }
+            
+        function step() {
+            // If i
+            if (actualVal < 15040 && actualVal >= 0) {
+                actualVal++;
+                sliderVal = Math.floor((actualVal/binWidth))+sliderStart;
+                // Only increment slider val if it's a new bin
+                d3.select("#slider-handle").attr("cx", Number(sliderVal));
+                let subject = Math.max(Number(ids[Math.round(actualVal)]),0);
+                tooltipSlider.html(   
+                "<font size='4'><b>Date</b>: " + allTweets[subject].nice_date + "</font>"
+                    + "<br/>"
+                    + "<font size='4'><b>Day</b>: " + allTweets[subject].day + "</font>"
+                    + "<br/>"
+                    + "<font size='4'><b>Text</b>: " + allTweets[subject].text + "</font>"
+                );
+                updateText(actualVal);
+            }     
+        }
+        
+        function stepBack() {
+            // If i
+            if (actualVal < 15040 && actualVal >= 0) {
+                actualVal--;
+                sliderVal = Math.                                                                                                                                                                                                                                                                                                                                                                               floor((actualVal/binWidth))+sliderStart;
+                // Only increment slider val if it's a new bin
+                d3.select("#slider-handle").attr("cx", Number(sliderVal));
+                let subject = Math.max(Number(ids[Math.round(actualVal)]),0);
+                tooltipSlider.html(   
+                "<font size='4'><b>Date</b>: " + allTweets[subject].nice_date + "</font>"
+                    + "<br/>"
+                    + "<font size='4'><b>Day</b>: " + allTweets[subject].day + "</font>"
+                    + "<br/>"
+                    + "<font size='4'><b>Text</b>: " + allTweets[subject].text + "</font>"
+                );
+                updateText(actualVal);
+            }     
+        }
+            
+        function doStuffs() {
+            var button = d3.select("#playbutton");
+            if (button.text() == "Pause") {
+              playing = false;
+              clearInterval(timer);
+              // timer = 0;
+              button.text("Play");
+            } else if (actualVal < 15040) {
+              button.text("Pause");
+              playing = true;
+              timer = setInterval(step, 600);
+            } else {
+              console.log("Cannot move past end")
+            }
+            console.log("Slider moving: " + playing);
+        }
+  
+            
+        function updateText(index) {
+            var i = 0;
+            var j = 0;
+            var k = 0;
+            // Get row of sizes
+            //var sizes = topicCounts[index];
+            let offset = offset2d[index];
+            let ids = ids2d[index];
+            let counts = counts2d[index];
+            
+            d3.selectAll(".topic-text")
+            .attr("id", function() {
+                // Update ID if and only if it needs to be
+                return ids[topicss[i++]];
+            })
+            .attr("x", function(d) {
+                return originx + Number(offsetTable[j].x_offset) + 50*(Number(offset[topicss[j]]))*Number(offsetTable[j++].x_offset);
+            })
+            .attr("y", function(d) {
+                return originy + Number(offsetTable[k].y_offset) + 50*(Number(offset[topicss[k]]))*Number(offsetTable[k++].y_offset);
+            });
+            
+            let o = ["Overall"]
+            let t = ["Topics"]
+            let a = ["Attacks"]
+            let n = ["News"]
+            let p = ["Places"]
+            let op = ["Opponents"]
+            let s = ["Supporters"]
+            
+            let ind = 0;
+            topicss.forEach(function(d) {
+                o.push(counts2d[index][d]);
+                if (ind < 12) t.push(counts2d[index][d]);
+                else if (ind < 17) a.push(counts2d[index][d]);
+                else if (ind < 22) n.push(counts2d[index][d]);
+                else if (ind < 30) p.push(counts2d[index][d]);
+                else if (ind < 38) op.push(counts2d[index][d]);
+                else s.push(counts2d[index][d]);
+                ind++;
+            })
+            
+            oC.load({
+                columns: [
+                    o
+                ],
+                unload: ['Overall'],
+            });
+            tC.load({
+                columns: [
+                    t
+                ],
+                unload: ['Topics'],
+            });
+            aC.load({
+                columns: [
+                    a
+                ],
+                unload: ['Attacks'],
+            });
+            nC.load({
+                columns: [
+                    n
+                ],
+                unload: ['News'],
+            });
+            pC.load({
+                columns: [
+                    p
+                ],
+                unload: ['Places'],
+            });
+            opC.load({
+                columns: [
+                    op
+                ],
+                unload: ['Opponents'],
+            });
+            sC.load({
+                columns: [
+                    s
+                ],
+                unload: ['Supporters'],
+            });
+            
+        }
+            
+    var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    
+    function changeAll(e) {
+        var target = d3.select(e.target);
+        if (target.style("background-color") == "rgb(231, 231, 231)") {
+            target.transition().style("background-color", "rgb(0, 128, 128)");
+            days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]; 
+            d3.selectAll("#daybutton").transition().style("background-color", "rgb(231, 231, 231)");
+        } else {
+            // Reset days to nothing
+            target.transition().style("background-color", "rgb(231, 231, 231)");
+            days = [];
+        }    
+    }
+
+    function changeColor(e) {
+        var target = d3.select(e.target);
+        target.transition().style("value", "memes");
+        if (target.style("background-color") == "rgb(231, 231, 231)") {
+            if (d3.select("#allbutton").style("background-color") == "rgb(0, 128, 128)") {
+                d3.select("#allbutton").transition().style("background-color", "rgb(231, 231, 231)");
+                days = [];
+            }
+            
+            target.transition().style("background-color", "rgb(0, 128, 128)");
+            days.push(target.text());
+        } else {
+            target.transition().style("background-color", "rgb(231, 231, 231)");
+            for (var i = days.length - 1; i >= 0; i--) {
+                if (days[i] == target.text()) {
+                    days.splice(i,1);
+                    break;
+                }
+            }
+            days.splice(i,1);
+        }    
+    }
+    
+    function applyFilter() {
+        let timeL = filter_slider.range().begin * 100;
+        let timeR = filter_slider.range().end * 100;
+        ids = [];
+        
+        let countPrev = {America: 0, Bernie: 0,Biden: 0,Border: 0, CBS: 0, CNN: 0, California: 0, China: 0, Collusion: 0, Court: 0, Crime: 0, DNC: 0, Dem: 0, Donald: 0, Economy: 0, Europe: 0, FBI: 0, FOX: 0, Fake: 0, Gun: 0, Hannity: 0, Hillary: 0, ISIS: 0, Immigration: 0, Israel: 0, Jobs: 0, Military: 0, Mitch: 0, Mueller: 0, NBC: 0, Obama: 0, PRESS: 0, Paul: 0, Pelosi: 0, Pence: 0, Puerto: 0, Repub: 0, Russia: 0, Schumer: 0, Trade: 0, Trump: 0, Virginia: 0, Wall: 0, Washington: 0, Witch: 0};
+        
+        let offsetPrev = {America: 10, Bernie: 10,Biden: 10,Border: 10, CBS: 10, CNN: 10, California: 10, China: 10, Collusion: 10, Court: 10, Crime: 10, DNC: 10, Dem: 10, Donald: 10, Economy: 10, Europe: 10, FBI: 10, FOX: 10, Fake: 10, Gun: 10, Hannity: 10, Hillary: 10, ISIS: 10, Immigration: 10, Israel: 10, Jobs: 10, Military: 10, Mitch: 10, Mueller: 10, NBC: 10, Obama: 10, PRESS: 10, Paul: 10, Pelosi: 10, Pence: 10, Puerto: 10, Repub: 10, Russia: 10, Schumer: 10, Trade: 10, Trump: 10, Virginia: 10, Wall: 10, Washington: 10, Witch: 10};
+        let idsPrev = {America: -1, Bernie: -1,Biden: -1,Border: -1, CBS: -1, CNN: -1, California: -1, China: -1, Collusion: -1, Court: -1, Crime: -1, DNC: -1, Dem: -1, Donald: -1, Economy: -1, Europe: -1, FBI: -1, FOX: -1, Fake: -1, Gun: -1, Hannity: -1, Hillary: -1, ISIS: -1, Immigration: -1, Israel: -1, Jobs: -1, Military: -1, Mitch: -1, Mueller: -1, NBC: -1, Obama: -1, PRESS: -1, Paul: -1, Pelosi: -1, Pence: -1, Puerto: -1, Repub: -1, Russia: -1, Schumer: -1, Trade: -1, Trump: -1, Virginia: -1, Wall: -1, Washington: -1, Witch: -1};
+        
+        idPrev = -1;
+        for (let x = 0; x < 15040; x++) {
+            // If it's within the time frame
+            if(Number(allTweets[x].time) >= timeL && Number(allTweets[x].time) <= timeR) {
+                // If it is in the subset of days
+                if (days.includes(allTweets[x].day)) {
+                    idPrev = Number(allTweets[x].id);
+                    topicss.forEach(function(d) {
+                        // Check if it is mentioned in the tweet
+                        if (Number(hasTopic[x][d]) == 1) {
+                            counts2d[x][d] = countPrev[d]+1;
+                            offset2d[x][d] = 0;
+                            ids2d[x][d] = Number(allTweets[x].id);
+                        } else {
+                            if (offsetPrev[d] < 10) {
+                                offset2d[x][d] = offsetPrev[d] + 1;
+                            } else {
+                                offset2d[x][d] = offsetPrev[d];
+                            }
+                            
+                            // Same as before
+                            ids2d[x][d] = idsPrev[d];
+                            counts2d[x][d] = countPrev[d]
+                        }
+                    });
+                } else {
+                    // Ignore again
+                    topicss.forEach(function(d) {
+                        counts2d[x][d] = countPrev[d];
+                        offset2d[x][d] = offsetPrev[d];
+                        ids2d[x][d] = idsPrev[d];
+                    });
+                }           
+            } else {
+                // If it is not within the time frame
+                topicss.forEach(function(d) {
+                    // Keep old values
+                    counts2d[x][d] = countPrev[d];
+                    offset2d[x][d] = offsetPrev[d];
+                    ids2d[x][d] = idsPrev[d];
+                });
+                
+            }     
+            countPrev = counts2d[x];
+            offsetPrev = offset2d[x];
+            idsPrev = ids2d[x];
+            ids.push(idPrev);
+        }
+        
+        createCharts();
+    }
+        
+    </script>    
+</body></html>
